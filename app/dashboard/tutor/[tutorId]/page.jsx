@@ -52,9 +52,13 @@ function Tutor({ params }) {
                     <h3><strong>Question:</strong> {jsonAnswer.question}</h3>
                     {jsonAnswer.answers && jsonAnswer.answers.map((answer, index) => (
                         <div key={index} className='mb-2'>
-                            <h3 className='font-bold text-xl'>Severity: {answer.category}</h3>
+                            <h3 className='font-bold text-xl'>Severity: {answer.severity}</h3>
+                            <h3 className='font-bold text-lg'><strong>Category:</strong> {answer.category}</h3>
                                 <div key={index} className='mb-1 gap-5'>
                                     <p className='font-bold text-sm'><strong>Description:</strong>{answer.description}</p>
+                                    <p className='font-bold text-sm'><strong>Cons:</strong> {answer.cons}</p>
+                                    <p className='font-bold text-sm'><strong>Pros:</strong> {answer.pros}</p>
+                                    <p className='font-bold text-sm'><strong>Story:</strong> {answer.story}</p>
                                 </div>
                         </div>
                     ))}

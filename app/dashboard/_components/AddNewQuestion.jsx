@@ -24,47 +24,40 @@ function AddNewQuestion() {
     const [loading, setLoading] = useState(false);
     const [jsonResponse, setJsonResponse] = useState([]);
     const{user}=useUser();
+    const router=useRouter();
+
     const onSubmit = async (e) => {
       setLoading(true);
       e.preventDefault();
       console.log(quesAsk);
-      const router=useRouter();
   
       const InputPrompt = "Your Question: " + quesAsk + " Depends on Question give " + process.env.NEXT_PUBLIC_ANSWER_COUNT + " answers in mild, moderate and severe categorization and analyse health issues with pros and cons and provide relevant information of it in a interactive and storytelling way in JSON Format. Give us question and answer field on JSON";
   
-      try {
-          const result = await chatSession.sendMessage(InputPrompt);
-          const answer= (result.response.text()).replace('json','').replace('','')
-  
-          try {
-              const answer = JSON.parse(answer);
-              console.log(answer);
-              setJsonResponse(answer);
-  
-              const resp = await db.insert(EJYAITutor)
-                  .values({
-                      quesId: uuidv4(),
-                      quesAsk: quesAsk,
-                      createdBy: user?.primaryEmailAddress?.emailAddress,
-                      createdAt: moment().format('DD-MM-yyyy'),
-                      answer: answer
-                  })
-                  .returning({ quesId: EJYAITutor.quesId });
-  
-              console.log("Inserted ID:", resp);
-              if (resp) {
-                  setOpenDialog(false);
-                  router.push(`/dashboard/tutor/${resp.quesId}`);
-              }
-          } catch (jsonError) {
-              console.error("JSON parsing error:", jsonError);
-              console.error("Problematic JSON string:", answer);
-          }
-      } catch (error) {
-          console.error("Error in fetching response:", error);
-      } finally {
-          setLoading(false);
+      const result = await chatSession.sendMessage(InputPrompt);
+      const answer = (result.response.text()).replace('```json','').replace('```','')
+      console.log(JSON.parse(answer));
+      setJsonResponse(answer);
+
+      if(answer){
+      const resp = await db.insert(EJYAITutor)
+          .values({
+              quesId: uuidv4(),
+              quesAsk: quesAsk,
+              createdBy: user?.primaryEmailAddress?.emailAddress,
+              createdAt: moment().format('DD-MM-yyyy'),
+              answer: answer
+          }).returning({ quesId: EJYAITutor.quesId });
+
+      console.log("Inserted ID:", resp);
+      if (resp) {
+          setOpenDialog(false);
+          router.push('/dashboard/tutor/'+resp.quesId);
       }
+    }else {
+      console.log("ERROR")
+    }
+  
+      setLoading(false);
   };
   
   return (
